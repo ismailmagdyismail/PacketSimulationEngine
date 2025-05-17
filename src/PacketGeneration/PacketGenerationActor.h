@@ -8,17 +8,23 @@
 //! Packet
 #include "Packet.h"
 
-class IPacketGenerator;
+//! Concurrency
+#include "Thread.h"
 
 template <typename T>
 class IChannel;
+
+//! Generation
+class IPacketGenerator;
 
 class PacketGenerationActor
 {
 public:
     PacketGenerationActor(std::unique_ptr<IPacketGenerator> &&p_pPacketGenerator, std::shared_ptr<IChannel<Packet>> &p_pOutputChannel);
+    ~PacketGenerationActor();
 
     void Start();
+    void Stop();
     void Pause();
 
 private:
@@ -29,6 +35,6 @@ private:
     std::shared_ptr<IChannel<Packet>> m_pOutputChannel;   //! Channel to put generated packets on
 
     //! threading for actor
-    std::thread m_oActorThread;
+    Thread m_oActorThread;
     std::atomic<bool> m_bIsRunning{false};
 };

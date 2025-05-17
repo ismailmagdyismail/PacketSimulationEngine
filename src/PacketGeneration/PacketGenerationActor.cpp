@@ -8,17 +8,30 @@
 #include "IChannel.h"
 
 PacketGenerationActor::PacketGenerationActor(std::unique_ptr<IPacketGenerator> &&p_pPacketGenerator, std::shared_ptr<IChannel<Packet>> &p_pOutputChannel)
-    : m_pPacketGenerator(std::move(p_pPacketGenerator)), m_pOutputChannel(p_pOutputChannel)
+    : m_pPacketGenerator(std::move(p_pPacketGenerator)),
+      m_pOutputChannel(p_pOutputChannel),
+      m_oActorThread{[this]()
+                     {
+                         this->Generate();
+                     }}
 {
+}
+
+PacketGenerationActor::~PacketGenerationActor()
+{
+    Stop();
+}
+
+void PacketGenerationActor::Stop()
+{
+    m_bIsRunning = false;
+    m_oActorThread.Stop();
 }
 
 void PacketGenerationActor::Start()
 {
     m_bIsRunning = true;
-    m_oActorThread = std::thread(&PacketGenerationActor::Generate, this);
-
-    //! TEMP till a custom RAII thread is added that joins by default in dest
-    m_oActorThread.detach();
+    m_oActorThread.Start();
 }
 
 void PacketGenerationActor::Pause()

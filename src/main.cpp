@@ -7,14 +7,10 @@
 #include <fstream>
 #include <iostream>
 
-int main()
+void ProducerThread(std::shared_ptr<IChannel<Packet>> channel, PacketGenerationActor &actor)
 {
-    std::shared_ptr<IChannel<Packet>> channel = std::make_shared<UnBufferedChannel<Packet>>();
-    PacketGenerationActor actor(std::make_unique<HTTPGenerator>(), channel);
-    std::ofstream packetLog{"./PacketSink.log.txt"};
-    actor.Start();
     int counter = 0;
-
+    std::ofstream packetLog{"./PacketSink.log.txt"};
     packetLog << "TimeStamp, srcAddress" << std::endl;
 
     while (true)
@@ -33,11 +29,28 @@ int main()
         //! Generate 20 packets for testing
         if (counter == 20)
         {
-            std::cerr << "Stopping Generator\n";
+            std::cerr << "Pausing Generator \n";
             actor.Pause();
-            channel->Close();
+            std::cerr << "Restarting Generator\n";
+            actor.Start();
+        }
+        if (counter == 40)
+        {
+            std::cerr << "Stopping Generator \n";
+            actor.Pause();
             break;
         }
     }
+}
+
+int main()
+{
+    std::shared_ptr<IChannel<Packet>> channel = std::make_shared<UnBufferedChannel<Packet>>();
+    PacketGenerationActor actor(std::make_unique<HTTPGenerator>(), channel);
+    actor.Start();
+    std::thread t(ProducerThread, channel, std::ref(actor));
+    t.join();
+    channel->Close();
+
     std::cerr << "Stopped\n";
 }
