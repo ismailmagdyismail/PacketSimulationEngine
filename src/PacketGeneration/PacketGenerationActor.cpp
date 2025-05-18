@@ -9,11 +9,7 @@
 
 PacketGenerationActor::PacketGenerationActor(std::unique_ptr<IPacketGenerator> &&p_pPacketGenerator, std::shared_ptr<IChannel<Packet>> &p_pOutputChannel)
     : m_pPacketGenerator(std::move(p_pPacketGenerator)),
-      m_pOutputChannel(p_pOutputChannel),
-      m_oActorThread{[this]()
-                     {
-                         this->Generate();
-                     }}
+      m_pOutputChannel(p_pOutputChannel)
 {
 }
 
@@ -31,13 +27,13 @@ void PacketGenerationActor::Stop()
 void PacketGenerationActor::Start()
 {
     m_bIsRunning = true;
-    m_oActorThread.Start();
+    m_oActorThread.Start(std::bind(&PacketGenerationActor::Generate, this));
 }
 
 void PacketGenerationActor::Pause()
 {
-    //! this should stop the running thread
-    //! thread will stop after it finishes the current it has on hand (if any)
+    //! this should pause the running thread
+    //! thread will pause after it finishes the current it has on hand (if any)
     //! if a packet is produced it will put it on the output channel, then stop
     //! this has importatnt implication: if there is no consumers to read the values, this thread will block forever
     //! this is basic design of channels by defnition , but important to keep in mind
