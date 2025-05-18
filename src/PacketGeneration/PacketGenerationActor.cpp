@@ -15,20 +15,18 @@ PacketGenerationActor::PacketGenerationActor(std::unique_ptr<IPacketGenerator> &
 
 PacketGenerationActor::~PacketGenerationActor()
 {
-    //! This would be sufficient since Thread already stops in destructor
-    // m_bIsRunning = false;
     Stop();
 }
 
 void PacketGenerationActor::Stop()
 {
-    m_bIsRunning = false;
+    Pause();
     m_oActorThread.Stop();
 }
 
 void PacketGenerationActor::Start()
 {
-    m_bIsRunning = true;
+    m_bIsGenerating = true;
     m_oActorThread.StartTask(std::bind(&PacketGenerationActor::Generate, this));
 }
 
@@ -39,12 +37,12 @@ void PacketGenerationActor::Pause()
     //! if a packet is produced it will put it on the output channel, then stop
     //! this has importatnt implication: if there is no consumers to read the values, this thread will block forever
     //! this is basic design of channels by defnition , but important to keep in mind
-    m_bIsRunning = false;
+    m_bIsGenerating = false;
 }
 
 void PacketGenerationActor::Generate()
 {
-    while (m_bIsRunning)
+    while (m_bIsGenerating)
     {
         Packet oPacket = m_pPacketGenerator->GeneratePacket();
         m_pOutputChannel->SendValue(oPacket);

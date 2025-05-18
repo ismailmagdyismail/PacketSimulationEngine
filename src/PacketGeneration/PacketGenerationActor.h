@@ -36,5 +36,5 @@ private:
 
     //! threading for actor
     Thread m_oActorThread;
-    std::atomic<bool> m_bIsRunning{false};
+    std::atomic<bool> m_bIsGenerating{false};
 };
