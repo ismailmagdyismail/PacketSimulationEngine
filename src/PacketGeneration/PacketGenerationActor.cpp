@@ -15,6 +15,8 @@ PacketGenerationActor::PacketGenerationActor(std::unique_ptr<IPacketGenerator> &
 
 PacketGenerationActor::~PacketGenerationActor()
 {
+    //! This would be sufficient since Thread already stops in destructor
+    // m_bIsRunning = false;
     Stop();
 }
 
@@ -27,7 +29,7 @@ void PacketGenerationActor::Stop()
 void PacketGenerationActor::Start()
 {
     m_bIsRunning = true;
-    m_oActorThread.Start(std::bind(&PacketGenerationActor::Generate, this));
+    m_oActorThread.StartTask(std::bind(&PacketGenerationActor::Generate, this));
 }
 
 void PacketGenerationActor::Pause()
