@@ -1,6 +1,7 @@
 #include "PacketGenerationActor.h"
 #include "HTTPGenerator.h"
 #include "UnBufferedChannel.h"
+#include "BufferedChannel.h"
 #include "IChannel.h"
 
 #include <memory>
@@ -29,7 +30,7 @@ void ConsumerThread(std::shared_ptr<IChannel<Packet>> channel)
 
 int main()
 {
-    std::shared_ptr<IChannel<Packet>> channel = std::make_shared<UnBufferedChannel<Packet>>();
+    std::shared_ptr<IChannel<Packet>> channel = std::make_shared<BufferedChannel<Packet>>(10000);
     PacketGenerationActor generator1(std::make_unique<HTTPGenerator>(), channel);
     PacketGenerationActor generator2(std::make_unique<HTTPGenerator>(), channel);
 
@@ -73,6 +74,7 @@ int main()
         }
     }
 
+    // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
     // generator1.Pause();
     // generator2.Pause();
     // generator1.Stop();
