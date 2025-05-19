@@ -1,18 +1,19 @@
 # Diagram
 
 ```
- +----------------------+
- |PacketGeneratorSource1| ----->
- +----------------------+
- +----------------------+
- |PacketGeneratorSource2| ----->
- +----------------------+
- +----------------------+        +----------------------+        +----------+       +--------------+       +------------+
- | PacketGeneratorSource3|-----> | Classifier/PacketSink|----->  | Filter   |-----> | LoadBalancer |-----> | OutputPort |
- +----------------------+        +----------------------+        +----------+       +--------------+       +------------+
-            |                               |                       |                       |                     |
-            |                               |                       |                       |                     |
-            +-------------------------------+-----------------------+-----------------------+---------------------+
+                                                                        +--------------------------+
+ +----------------------+                                               | FilteredPacketsStatistics|
+ |PacketGeneratorSource1| ----->                                        +--------------------------+
+ +----------------------+                                                           ^
+ +----------------------+                                                           |
+ |PacketGeneratorSource2| ----->                                                    |
+ +----------------------+                                                           |
+ +----------------------+        +----------------------+        +----------+       |     +--------------+        +------------+
+ | PacketGeneratorSource3|-----> | Classifier/PacketSink|----->  | Filter   | ----------> | LoadBalancer | -----> | OutputPort |
+ +----------------------+        +----------------------+        +----------+             +--------------+        +------------+
+            |                               |                       |                           |                       |
+            |                               |                       |                           |                       |
+            +-------------------------------+-----------------------+---------------------------+-----------------------+
                                      |                                         |
                                      v                                         v
                             +-----------------+                      +-------------------+
@@ -29,11 +30,11 @@
 
 - Generate packets with:
 
-- Random source/destination IPs (e.g., "192.168.1.x")
+  - Random source/destination IPs (e.g., "192.168.1.x")
 
-- Random protocol from predefined set (HTTP, DNS, ICMP)
+  - Random protocol from predefined set (HTTP, DNS, ICMP)
 
-- Random packet size between 64-1500 bytes
+  - Random packet size between 64-1500 bytes
 
 - Generate packets at random intervals (e.g., 10–100ms)
 
