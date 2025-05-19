@@ -39,6 +39,8 @@
 
 - Can be Pause or Stopped All together !
 
+- Allow Changing Configuration At Run-Time for specific Generator (via File OR UI)
+
 ## Scheduler
 
 ## Classifier
