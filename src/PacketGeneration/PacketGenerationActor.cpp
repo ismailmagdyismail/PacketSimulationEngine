@@ -45,6 +45,6 @@ void PacketGenerationActor::Generate()
     while (m_bIsGenerating)
     {
         Packet oPacket = m_pPacketGenerator->GeneratePacket();
-        m_pOutputChannel->SendValue(oPacket);
+        m_pOutputChannel->SendValue(std::move(oPacket));
     }
 }
