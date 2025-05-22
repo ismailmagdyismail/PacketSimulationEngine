@@ -3,13 +3,15 @@
 #include "UnBufferedChannel.h"
 #include "BufferedChannel.h"
 #include "IChannel.h"
+#include "ChannelSelector.h"
+#include "ChannelBasedGenerationStatisticsActor.h"
 
 #include <memory>
 #include <fstream>
 #include <iostream>
 #include <set>
 
-void ConsumerThread(std::shared_ptr<IChannel<Packet>> channel)
+void ConsumerThread(std::shared_ptr<IChannel<Packet>> channel, std::shared_ptr<IChannel<std::shared_ptr<Packet>>> statisticsChannel)
 {
     std::ofstream packetLog{"./PacketSink.log.txt"};
     packetLog << "TimeStamp, srcAddress" << std::endl;
@@ -22,6 +24,8 @@ void ConsumerThread(std::shared_ptr<IChannel<Packet>> channel)
         {
             break;
         }
+
+        statisticsChannel->SendValue(std::make_shared<Packet>(oPacket)); // TEMP:COPY
         packetLog << std::chrono::duration_cast<std::chrono::milliseconds>(oPacket.m_chronoTimestamp.time_since_epoch()).count() << ",";
         packetLog << oPacket.m_strSrcAddress << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -34,10 +38,13 @@ int main()
     PacketGenerationActor generator1(std::make_unique<HTTPGenerator>(), channel);
     PacketGenerationActor generator2(std::make_unique<HTTPGenerator>(), channel);
 
+    std::shared_ptr<IChannel<std::shared_ptr<Packet>>> statisticsChannel = std::make_shared<BufferedChannel<std::shared_ptr<Packet>>>(10000);
+    ChannelBasedGenerationStatisticsActor statisticsActor(statisticsChannel);
+
     generator1.Start();
     generator2.Start();
 
-    std::thread t(ConsumerThread, channel);
+    std::thread t(ConsumerThread, channel, statisticsChannel);
 
     std::set<int> generatorsRunning{1, 2};
 
@@ -46,11 +53,14 @@ int main()
         std::cout << "Generators Running: \n";
         for (int generatorId : generatorsRunning)
         {
-            std::cout << "GeneratorID::" << generatorId << '\n';
+            std::cout << "-Stop-Generator::" << generatorId << '\n';
         }
+        std::cout << "-GetStatistics" << std::endl;
+
         std::string input;
-        std::cout << "Enter ID:";
+        std::cout << "Enter OperationId:";
         std::cin >> input;
+
         if (input == "1")
         {
             std::cerr << "Stopping Generator" << input << std::endl;
@@ -62,6 +72,11 @@ int main()
             std::cerr << "Stopping Generator" << input << std::endl;
             generator2.Pause();
             generatorsRunning.erase(2);
+        }
+        else if (input == "3")
+        {
+            GenerationStatistics oStatistics = statisticsActor.GetStatistics();
+            std::cerr << "PacketsCount: " << oStatistics.m_sPacketsCount << std::endl;
         }
         else
         {
@@ -84,6 +99,8 @@ int main()
     std::cerr << "Closing Chanels...\n";
     channel->Close();
     t.join();
+
+    // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
     std::cerr << "Stopped\n";
 }
