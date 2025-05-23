@@ -5,7 +5,7 @@
 #include "IChannel.h"
 #include "ChannelSelector.h"
 #include "ChannelBasedGenerationStatisticsActor.h"
-#include "StatisticsActor.h"
+#include "GenerationStatisticsActor.h"
 
 #include <memory>
 #include <fstream>
@@ -44,8 +44,7 @@ int main()
 
     generator1.Start();
     generator2.Start();
-    std::string strReply;
-    statisticsActor.Start(strReply);
+    statisticsActor.Start();
 
     std::thread t(ConsumerThread, channel, statisticsChannel);
 
@@ -101,6 +100,7 @@ int main()
     std::cerr << "All Generators Terminated\n";
     std::cerr << "Closing Chanels...\n";
     channel->Close();
+    statisticsChannel->Close();
     t.join();
 
     // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
