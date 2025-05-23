@@ -55,6 +55,7 @@ bool GenerationStatisticsActor::Pause(std::string &p_strReplyMessage)
 
 GenerationStatistics GenerationStatisticsActor::GetStatistics()
 {
+    std::lock_guard<std::mutex> oLock{m_oStatisticsMutex};
     return m_oStatistics;
 }
 
@@ -76,6 +77,7 @@ void GenerationStatisticsActor::Run()
 
 void GenerationStatisticsActor::UpdateStatistics(std::shared_ptr<Packet> &p_pPacket)
 {
+    std::lock_guard<std::mutex> oLock{m_oStatisticsMutex};
     m_oStatistics.m_oPacketsTypeFrequency[p_pPacket->m_eProtocol]++;
     m_oStatistics.m_sPacketsCount++;
     //! TODO:

@@ -31,6 +31,7 @@ private:
 
     std::shared_ptr<IChannel<std::shared_ptr<Packet>>> m_pPacketsChannel;
 
+    std::mutex m_oStatisticsMutex;
     GenerationStatistics m_oStatistics;
 
     Thread m_oActorThread;
