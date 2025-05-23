@@ -12,7 +12,7 @@
 #include <iostream>
 #include <set>
 
-void ConsumerThread(std::shared_ptr<IChannel<Packet>> channel, std::shared_ptr<IChannel<std::shared_ptr<Packet>>> statisticsChannel)
+void ConsumerThread(std::shared_ptr<IChannel<Packet>> channel, std::shared_ptr<IChannel<std::shared_ptr<const Packet>>> statisticsChannel)
 {
     std::ofstream packetLog{"./PacketSink.log.txt"};
     packetLog << "TimeStamp, srcAddress" << std::endl;
@@ -39,7 +39,7 @@ int main()
     PacketGenerationActor generator1(std::make_unique<HTTPGenerator>(), channel);
     PacketGenerationActor generator2(std::make_unique<HTTPGenerator>(), channel);
 
-    std::shared_ptr<IChannel<std::shared_ptr<Packet>>> statisticsChannel = std::make_shared<BufferedChannel<std::shared_ptr<Packet>>>(10000);
+    std::shared_ptr<IChannel<std::shared_ptr<const Packet>>> statisticsChannel = std::make_shared<BufferedChannel<std::shared_ptr<const Packet>>>(10000);
     GenerationStatisticsActor statisticsActor(statisticsChannel);
 
     generator1.Start();

@@ -17,15 +17,15 @@ class UnBufferedChannel;
 class GenerationStatisticsActor : public Actor
 {
 public:
-    GenerationStatisticsActor(std::shared_ptr<IChannel<std::shared_ptr<Packet>>> &p_pPacketsChannel);
+    GenerationStatisticsActor(std::shared_ptr<IChannel<std::shared_ptr<const Packet>>> &p_pPacketsChannel);
 
     GenerationStatistics GetStatistics();
 
 private:
     void ProcessPacket();
-    void UpdateStatistics(std::shared_ptr<Packet> &p_pPacket);
+    void UpdateStatistics(std::shared_ptr<const Packet> &p_pPacket);
 
-    std::shared_ptr<IChannel<std::shared_ptr<Packet>>> m_pPacketsChannel;
+    std::shared_ptr<IChannel<std::shared_ptr<const Packet>>> m_pPacketsChannel;
 
     std::mutex m_oStatisticsMutex;
     GenerationStatistics m_oStatistics;
