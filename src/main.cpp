@@ -5,6 +5,7 @@
 #include "IChannel.h"
 #include "ChannelSelector.h"
 #include "ChannelBasedGenerationStatisticsActor.h"
+#include "StatisticsActor.h"
 
 #include <memory>
 #include <fstream>
@@ -39,10 +40,12 @@ int main()
     PacketGenerationActor generator2(std::make_unique<HTTPGenerator>(), channel);
 
     std::shared_ptr<IChannel<std::shared_ptr<Packet>>> statisticsChannel = std::make_shared<BufferedChannel<std::shared_ptr<Packet>>>(10000);
-    ChannelBasedGenerationStatisticsActor statisticsActor(statisticsChannel);
+    GenerationStatisticsActor statisticsActor(statisticsChannel);
 
     generator1.Start();
     generator2.Start();
+    std::string strReply;
+    statisticsActor.Start(strReply);
 
     std::thread t(ConsumerThread, channel, statisticsChannel);
 
