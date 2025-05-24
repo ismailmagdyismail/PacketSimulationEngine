@@ -1,16 +1,15 @@
 # Diagram
 
 ```
-                                                                        +--------------------------+
- +----------------------+                                               | FilteredPacketsStatistics|
- |PacketGeneratorSource1| ----->                                        +--------------------------+
- +----------------------+                                                           ^
- +----------------------+                                                           |
- |PacketGeneratorSource2| ----->                                                    |
- +----------------------+                                                           |
- +----------------------+        +----------------------+        +----------+       |     +--------------+        +------------+
- | PacketGeneratorSource3|-----> | Classifier/PacketSink|----->  | Filter   | ----------> | LoadBalancer | -----> | OutputPort |
- +----------------------+        +----------------------+        +----------+             +--------------+        +------------+
+ +----------------------+                                                                                          +------------------------+
+ |PacketGeneratorSource1| ----->                                                   |-----------------------------> |FilterdPacketsOutputPort|
+ +----------------------+                                                          |                               +------------------------+
+ +----------------------+                                                          |                               +-------------+
+ |PacketGeneratorSource2| ----->                                                   |                          |--> | OutputPort2 |
+ +----------------------+                                                          |                          |    +-------------+
+ +----------------------+        +----------------------+        +----------+      |      +--------------+    |    +-------------+
+ |PacketGeneratorSource3| -----> | Classifier/PacketSink|----->  | Filter   | ----------> | LoadBalancer | ----->  | OutputPort1 |
+ +----------------------+        +----------------------+        +----------+             +--------------+         +-------------+
             |                               |                       |                           |                       |
             |                               |                       |                           |                       |
             +-------------------------------+-----------------------+---------------------------+-----------------------+
@@ -91,3 +90,27 @@
 - Forwarded
 
 - Every second, prints or logs current statistics.
+
+## UI Dashboard Controls
+
+### Packet Generators Views , Controls
+
+- View All Available PacketGenerators
+- Start ,Pause , Stop Specific Generators
+
+### Output Port Views, Controls
+
+- View All output ports, and thier statistics
+
+### Generation Statistics View
+
+- View Statistics about GeneratedPackets
+
+### Filtered Statistics View
+
+- View Statistics about filtered Packets
+
+### Table for All Packet
+
+- View Each Packet Status (Filtered, Delivered , in Route)
+- View info about it (timestamp, protocol , etc...)
