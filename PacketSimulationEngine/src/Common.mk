@@ -2,7 +2,7 @@ CXX := g++
 CXXFLAGS := -Wall -Wextra -g -O0 -std=c++17 -MMD -MP
 
 CONCURRENCY_LIB_PATH := $(ROOT_PATH)/Concurrency-Lib
-PACKET_SIMULATIONS_SRC := $(ROOT_PATH)/src
+PACKET_SIMULATIONS_SRC := $(ROOT_PATH)/PacketSimulationEngine/src
 
 THREAD_PATH := $(CONCURRENCY_LIB_PATH)/Thread
 UnBufferedChannelPath := $(CONCURRENCY_LIB_PATH)/Channels/UnBufferedChannel

@@ -1,11 +1,10 @@
-ROOT_PATH = ../../
+ROOT_PATH = ../../../
 include ../Common.mk
 
 SRCS := $(wildcard *.cpp)
 OBJS := $(SRCS:.cpp=.o)
 DEPS := $(OBJS:.o=.d)
 
-INCLUDES += -I.\
 
 all: $(OBJS)
 

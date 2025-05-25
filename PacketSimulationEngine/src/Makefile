@@ -1,4 +1,4 @@
-ROOT_PATH = ../
+ROOT_PATH = ../../
 include ./Common.mk
 
 SRCS := $(wildcard *.cpp)
