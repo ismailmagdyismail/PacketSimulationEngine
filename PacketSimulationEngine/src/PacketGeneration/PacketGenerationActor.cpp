@@ -20,6 +20,7 @@ PacketGenerationActor::~PacketGenerationActor()
 
 void PacketGenerationActor::Stop()
 {
+    std::lock_guard<std::mutex> oLock{m_oStateMutex};
     Pause();
     m_oActorThread.Stop();
 }
