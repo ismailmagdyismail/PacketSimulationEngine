@@ -7,7 +7,7 @@
 //! Messaging channels
 #include "IChannel.h"
 
-PacketGenerationActor::PacketGenerationActor(std::unique_ptr<IPacketGenerator> &&p_pPacketGenerator, std::shared_ptr<IChannel<Packet>> &p_pOutputChannel)
+PacketGenerationActor::PacketGenerationActor(std::unique_ptr<IPacketGenerator> &&p_pPacketGenerator, std::shared_ptr<IChannel<std::shared_ptr<Packet>>> &p_pOutputChannel)
     : m_pPacketGenerator(std::move(p_pPacketGenerator)),
       m_pOutputChannel(p_pOutputChannel)
 {
@@ -45,7 +45,7 @@ void PacketGenerationActor::Generate()
 {
     while (m_bIsGenerating)
     {
-        Packet oPacket = m_pPacketGenerator->GeneratePacket();
-        m_pOutputChannel->SendValue(std::move(oPacket));
+        std::shared_ptr<Packet> pPacket = m_pPacketGenerator->GeneratePacket();
+        m_pOutputChannel->SendValue(std::move(pPacket));
     }
 }

@@ -1,6 +1,6 @@
 #include "GenerationStatisticsActor.h"
 
-GenerationStatisticsActor::GenerationStatisticsActor(std::shared_ptr<IChannel<std::shared_ptr<const Packet>>> &p_pPacketsChannel)
+GenerationStatisticsActor::GenerationStatisticsActor(std::shared_ptr<IChannel<std::shared_ptr<Packet>>> &p_pPacketsChannel)
     : Actor(std::bind(&GenerationStatisticsActor::ProcessPacket, this)), m_pPacketsChannel(p_pPacketsChannel)
 {
 }
@@ -13,7 +13,7 @@ GenerationStatistics GenerationStatisticsActor::GetStatistics()
 
 void GenerationStatisticsActor::ProcessPacket()
 {
-    std::shared_ptr<const Packet> pPacket;
+    std::shared_ptr<Packet> pPacket;
     bool bResult = m_pPacketsChannel->ReadValue(pPacket);
     //! Failed to read result from channels
     //! probably got closed
@@ -24,7 +24,7 @@ void GenerationStatisticsActor::ProcessPacket()
     UpdateStatistics(pPacket);
 }
 
-void GenerationStatisticsActor::UpdateStatistics(std::shared_ptr<const Packet> &p_pPacket)
+void GenerationStatisticsActor::UpdateStatistics(std::shared_ptr<Packet> &p_pPacket)
 {
     std::lock_guard<std::mutex> oLock{m_oStatisticsMutex};
     m_oStatistics.m_oPacketsTypeFrequency[p_pPacket->m_eProtocol]++;

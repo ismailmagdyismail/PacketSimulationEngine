@@ -9,8 +9,8 @@ TARGET := PacketSimulation.exe
 
 all: $(TARGET)
 
-$(TARGET): $(OBJS) Packet-Generation Statistics-Counter Concurrency-Lib
-	$(CXX) $(CXXFLAGS) $(OBJS) $(PACKET_GENERATION_PATH)/*.o $(STATISTICS_COUNTER_PATH)/*.o $(THREAD_PATH)/*.o $(ACTORS_PATH)/*.o -o $@
+$(TARGET): $(OBJS) Packet-Generation Statistics-Counter Concurrency-Lib Packet-Sink
+	$(CXX) $(CXXFLAGS) $(OBJS) $(PACKET_GENERATION_PATH)/*.o $(STATISTICS_COUNTER_PATH)/*.o $(THREAD_PATH)/*.o $(ACTORS_PATH)/*.o $(PACKET_SINK_PATH)/*.o -o $@
 
 Packet-Generation:
 	make -j -C $(PACKET_GENERATION_PATH)
@@ -20,6 +20,9 @@ Concurrency-Lib:
 
 Statistics-Counter:
 	make -j -C $(STATISTICS_COUNTER_PATH)
+
+Packet-Sink:
+	make -j -C $(PACKET_SINK_PATH)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@

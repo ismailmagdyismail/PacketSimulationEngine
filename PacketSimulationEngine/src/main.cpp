@@ -6,47 +6,29 @@
 #include "ChannelSelector.h"
 #include "ChannelBasedGenerationStatisticsActor.h"
 #include "GenerationStatisticsActor.h"
+#include "PacketSinkActor.h"
 
 #include <memory>
 #include <fstream>
 #include <iostream>
 #include <set>
 
-void ConsumerThread(std::shared_ptr<IChannel<Packet>> channel, std::shared_ptr<IChannel<std::shared_ptr<const Packet>>> statisticsChannel)
-{
-    std::ofstream packetLog{"./PacketSink.log.txt"};
-    packetLog << "TimeStamp, srcAddress" << std::endl;
-
-    while (true)
-    {
-        Packet oPacket{};
-        bool bResult = channel->ReadValue(oPacket);
-        if (!bResult)
-        {
-            break;
-        }
-
-        statisticsChannel->SendValue(std::make_shared<Packet>(oPacket)); // TEMP:COPY
-        packetLog << std::chrono::duration_cast<std::chrono::milliseconds>(oPacket.m_chronoTimestamp.time_since_epoch()).count() << ",";
-        packetLog << oPacket.m_strSrcAddress << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    }
-}
-
 int main()
 {
-    std::shared_ptr<IChannel<Packet>> channel = std::make_shared<BufferedChannel<Packet>>(10000);
+    std::shared_ptr<IChannel<std::shared_ptr<Packet>>> channel = std::make_shared<BufferedChannel<std::shared_ptr<Packet>>>(10000);
     PacketGenerationActor generator1(std::make_unique<HTTPGenerator>(), channel);
     PacketGenerationActor generator2(std::make_unique<HTTPGenerator>(), channel);
 
-    std::shared_ptr<IChannel<std::shared_ptr<const Packet>>> statisticsChannel = std::make_shared<BufferedChannel<std::shared_ptr<const Packet>>>(10000);
+    std::shared_ptr<IChannel<std::shared_ptr<Packet>>> statisticsChannel = std::make_shared<BufferedChannel<std::shared_ptr<Packet>>>(10000);
     GenerationStatisticsActor statisticsActor(statisticsChannel);
+
+    std::vector<std::shared_ptr<IChannel<std::shared_ptr<Packet>>>> vecOutputChannels{statisticsChannel};
+    PacketSinkActor oPacketSinkActor(channel, std::move(vecOutputChannels));
 
     generator1.Start();
     generator2.Start();
     statisticsActor.Start();
-
-    std::thread t(ConsumerThread, channel, statisticsChannel);
+    oPacketSinkActor.Start();
 
     std::set<int> generatorsRunning{1, 2};
 
@@ -101,7 +83,6 @@ int main()
     std::cerr << "Closing Chanels...\n";
     channel->Close();
     statisticsChannel->Close();
-    t.join();
 
     // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
