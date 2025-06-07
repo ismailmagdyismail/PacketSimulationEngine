@@ -7,6 +7,7 @@
 #include "ChannelBasedGenerationStatisticsActor.h"
 #include "GenerationStatisticsActor.h"
 #include "PacketSinkActor.h"
+#include "PacketFilterActor.h"
 
 #include <memory>
 #include <fstream>
@@ -15,23 +16,36 @@
 
 int main()
 {
-    std::shared_ptr<IChannel<std::shared_ptr<Packet>>> channel = std::make_shared<BufferedChannel<std::shared_ptr<Packet>>>(10000);
-    PacketGenerationActor generator1(std::make_unique<HTTPGenerator>(), channel);
-    PacketGenerationActor generator2(std::make_unique<HTTPGenerator>(), channel);
+    std::shared_ptr<IChannel<std::shared_ptr<Packet>>> oGenerationDumpChannel = std::make_shared<BufferedChannel<std::shared_ptr<Packet>>>(10000);
+    PacketGenerationActor generator1(std::make_unique<HTTPGenerator>(), oGenerationDumpChannel);
+    PacketGenerationActor generator2(std::make_unique<HTTPGenerator>(), oGenerationDumpChannel);
 
-    std::shared_ptr<IChannel<std::shared_ptr<Packet>>> statisticsChannel = std::make_shared<BufferedChannel<std::shared_ptr<Packet>>>(10000);
-    GenerationStatisticsActor statisticsActor(statisticsChannel);
+    std::shared_ptr<IChannel<std::shared_ptr<Packet>>> oGenerationStatisticsChannel = std::make_shared<BufferedChannel<std::shared_ptr<Packet>>>(10000);
+    GenerationStatisticsActor oGenerationStatisticsActor(oGenerationStatisticsChannel);
 
-    std::vector<std::shared_ptr<IChannel<std::shared_ptr<Packet>>>> vecOutputChannels{statisticsChannel};
-    PacketSinkActor oPacketSinkActor(channel, std::move(vecOutputChannels));
+    std::shared_ptr<IChannel<std::shared_ptr<Packet>>> oFilteredStatisticsChannel = std::make_shared<BufferedChannel<std::shared_ptr<Packet>>>(10000);
+    GenerationStatisticsActor oFilterdStatisticsActor(oFilteredStatisticsChannel);
+
+    std::shared_ptr<IChannel<std::shared_ptr<Packet>>> oPacketFilterChannel = std::make_shared<BufferedChannel<std::shared_ptr<Packet>>>(10000);
+    std::vector<std::shared_ptr<IChannel<std::shared_ptr<Packet>>>> vecFilteredPacketsOutputChannel{oFilteredStatisticsChannel};
+    std::vector<std::shared_ptr<IChannel<std::shared_ptr<Packet>>>> vecForwardPacketsOutputChannel;
+    PacketFilterActor oPacketFilterActor(oPacketFilterChannel, std::move(vecForwardPacketsOutputChannel), std::move(vecFilteredPacketsOutputChannel));
+
+    std::vector<std::shared_ptr<IChannel<std::shared_ptr<Packet>>>> vecPacketSinkOutputChannels{oGenerationStatisticsChannel, oPacketFilterChannel};
+    PacketSinkActor oPacketSinkActor(oGenerationDumpChannel, std::move(vecPacketSinkOutputChannels));
+
+    oPacketFilterActor.Configure(
+        {.m_eProtocolToFilter = Protocol::HTTP});
 
     generator1.Start();
     generator2.Start();
-    statisticsActor.Start();
+    oGenerationStatisticsActor.Start();
+    oFilterdStatisticsActor.Start();
+    oPacketFilterActor.Start();
     oPacketSinkActor.Start();
 
     std::set<int> generatorsRunning{1, 2};
-
+    int originalSize = generatorsRunning.size();
     while (true)
     {
         std::cout << "Generators Running: \n";
@@ -39,7 +53,8 @@ int main()
         {
             std::cout << "-Stop-Generator::" << generatorId << '\n';
         }
-        std::cout << "-GetStatistics" << std::endl;
+        std::cout << originalSize + 1 << "-GetGenerationStatistics" << std::endl;
+        std::cout << originalSize + 2 << "-GetFilteredStatistics" << std::endl;
 
         std::string input;
         std::cout << "Enter OperationId:";
@@ -59,8 +74,13 @@ int main()
         }
         else if (input == "3")
         {
-            GenerationStatistics oStatistics = statisticsActor.GetStatistics();
-            std::cerr << "PacketsCount: " << oStatistics.m_sPacketsCount << std::endl;
+            GenerationStatistics oStatistics = oGenerationStatisticsActor.GetStatistics();
+            std::cerr << "Generated PacketsCount: " << oStatistics.m_sPacketsCount << std::endl;
+        }
+        else if (input == "4")
+        {
+            GenerationStatistics oStatistics = oFilterdStatisticsActor.GetStatistics();
+            std::cerr << "Filtered PacketsCount: " << oStatistics.m_sPacketsCount << std::endl;
         }
         else
         {
@@ -81,8 +101,10 @@ int main()
 
     std::cerr << "All Generators Terminated\n";
     std::cerr << "Closing Chanels...\n";
-    channel->Close();
-    statisticsChannel->Close();
+    oGenerationDumpChannel->Close();
+    oGenerationStatisticsChannel->Close();
+    oFilteredStatisticsChannel->Close();
+    oPacketFilterChannel->Close();
 
     // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
