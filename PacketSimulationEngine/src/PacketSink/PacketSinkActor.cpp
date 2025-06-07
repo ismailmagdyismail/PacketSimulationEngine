@@ -1,5 +1,6 @@
 #include "PacketSinkActor.h"
 #include "Packet.h"
+#include "IChannel.h"
 
 PacketSinkActor::PacketSinkActor(std::shared_ptr<IChannel<std::shared_ptr<Packet>>> &p_pInputChannel, std::vector<std::shared_ptr<IChannel<std::shared_ptr<Packet>>>> &&p_vecOutputChannels)
     : Actor(std::bind(&PacketSinkActor::CollectPackets, this)), m_oInputChannel(p_pInputChannel), m_vecOutputChannels(std::move(p_vecOutputChannels))

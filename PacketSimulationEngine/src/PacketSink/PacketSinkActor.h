@@ -6,11 +6,12 @@
 
 //! threading
 #include "Actor.h"
-#include "BufferedChannel.h"
 
 #include <iostream>
 
 struct Packet;
+template <typename T>
+class IChannel;
 
 class PacketSinkActor : public Actor
 {
