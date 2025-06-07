@@ -5,7 +5,7 @@
 #include "IChannel.h"
 #include "ChannelSelector.h"
 #include "ChannelBasedGenerationStatisticsActor.h"
-#include "GenerationStatisticsActor.h"
+#include "StatisticsActor.h"
 #include "PacketSinkActor.h"
 #include "PacketFilterActor.h"
 
@@ -21,10 +21,10 @@ int main()
     PacketGenerationActor generator2(std::make_unique<HTTPGenerator>(), oGenerationDumpChannel);
 
     std::shared_ptr<IChannel<std::shared_ptr<Packet>>> oGenerationStatisticsChannel = std::make_shared<BufferedChannel<std::shared_ptr<Packet>>>(10000);
-    GenerationStatisticsActor oGenerationStatisticsActor(oGenerationStatisticsChannel);
+    StatisticsActor oGenerationStatisticsActor(oGenerationStatisticsChannel);
 
     std::shared_ptr<IChannel<std::shared_ptr<Packet>>> oFilteredStatisticsChannel = std::make_shared<BufferedChannel<std::shared_ptr<Packet>>>(10000);
-    GenerationStatisticsActor oFilterdStatisticsActor(oFilteredStatisticsChannel);
+    StatisticsActor oFilterdStatisticsActor(oFilteredStatisticsChannel);
 
     std::shared_ptr<IChannel<std::shared_ptr<Packet>>> oPacketFilterChannel = std::make_shared<BufferedChannel<std::shared_ptr<Packet>>>(10000);
     std::vector<std::shared_ptr<IChannel<std::shared_ptr<Packet>>>> vecFilteredPacketsOutputChannel{oFilteredStatisticsChannel};

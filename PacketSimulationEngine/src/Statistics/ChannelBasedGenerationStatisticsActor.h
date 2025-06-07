@@ -5,7 +5,7 @@
 #include "ChannelSelector.h"
 
 //! Statistics
-#include "GenerationStatistics.h"
+#include "StatisticsActor.h"
 
 struct Packet;
 

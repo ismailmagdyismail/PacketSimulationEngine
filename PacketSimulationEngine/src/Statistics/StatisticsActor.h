@@ -5,7 +5,7 @@
 #include "Actor.h"
 
 //! Statistics
-#include "GenerationStatistics.h"
+#include "Statistics.h"
 
 struct Packet;
 
@@ -14,10 +14,10 @@ class BufferedChannel;
 template <typename T>
 class UnBufferedChannel;
 
-class GenerationStatisticsActor : public Actor
+class StatisticsActor : public Actor
 {
 public:
-    GenerationStatisticsActor(std::shared_ptr<IChannel<std::shared_ptr<Packet>>> &p_pPacketsChannel);
+    StatisticsActor(std::shared_ptr<IChannel<std::shared_ptr<Packet>>> &p_pPacketsChannel);
 
     GenerationStatistics GetStatistics();
 

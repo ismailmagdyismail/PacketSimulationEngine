@@ -1,17 +1,17 @@
-#include "GenerationStatisticsActor.h"
+#include "StatisticsActor.h"
 
-GenerationStatisticsActor::GenerationStatisticsActor(std::shared_ptr<IChannel<std::shared_ptr<Packet>>> &p_pPacketsChannel)
-    : Actor(std::bind(&GenerationStatisticsActor::ProcessPacket, this)), m_pPacketsChannel(p_pPacketsChannel)
+StatisticsActor::StatisticsActor(std::shared_ptr<IChannel<std::shared_ptr<Packet>>> &p_pPacketsChannel)
+    : Actor(std::bind(&StatisticsActor::ProcessPacket, this)), m_pPacketsChannel(p_pPacketsChannel)
 {
 }
 
-GenerationStatistics GenerationStatisticsActor::GetStatistics()
+GenerationStatistics StatisticsActor::GetStatistics()
 {
     std::lock_guard<std::mutex> oLock{m_oStatisticsMutex};
     return m_oStatistics;
 }
 
-void GenerationStatisticsActor::ProcessPacket()
+void StatisticsActor::ProcessPacket()
 {
     std::shared_ptr<Packet> pPacket;
     bool bResult = m_pPacketsChannel->ReadValue(pPacket);
@@ -24,7 +24,7 @@ void GenerationStatisticsActor::ProcessPacket()
     UpdateStatistics(pPacket);
 }
 
-void GenerationStatisticsActor::UpdateStatistics(std::shared_ptr<Packet> &p_pPacket)
+void StatisticsActor::UpdateStatistics(std::shared_ptr<Packet> &p_pPacket)
 {
     std::lock_guard<std::mutex> oLock{m_oStatisticsMutex};
     m_oStatistics.m_oPacketsTypeFrequency[p_pPacket->m_eProtocol]++;
