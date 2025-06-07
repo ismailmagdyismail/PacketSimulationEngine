@@ -35,6 +35,7 @@ clean:
 	make clean -C $(CONCURRENCY_LIB_PATH)
 	make clean -C $(PACKET_GENERATION_PATH)
 	make clean -C $(STATISTICS_COUNTER_PATH)
-
+	make clean -C $(PACKET_SINK_PATH)
+	make clean -C $(PACKET_FILTER_PATH)
 
 -include $(DEPS)
