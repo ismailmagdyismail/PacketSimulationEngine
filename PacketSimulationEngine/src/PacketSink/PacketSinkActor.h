@@ -1,3 +1,5 @@
+#pragma once
+
 //! System includes
 #include <memory>
 #include <vector>
